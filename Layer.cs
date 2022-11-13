@@ -34,6 +34,7 @@ namespace Operation_Terminator
                 Console.WriteLine("Wrong number of inputs in forward pass");
                 return;
             }*/
+            
             return inputs * weights;
             
         }

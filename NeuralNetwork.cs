@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using MathNet.Numerics.LinearAlgebra;
 
 namespace Operation_Terminator
@@ -66,9 +68,14 @@ namespace Operation_Terminator
         }
 
         public Vector<float> TrainBatch(Matrix<float> inputs, int[] labels) {
-            Vector<float> lossVec = Vector<float>.Build.Dense(inputs.RowCount);
+            
             var output = BrainBatch(inputs);
             output = SoftMax(output);
+            return LossCatergoricalCrossEntropy(output, labels);
+        }
+        
+        public static Vector<float> LossCatergoricalCrossEntropy(Matrix<float> output, int[] labels) {
+            Vector<float> lossVec = Vector<float>.Build.Dense(output.RowCount);
             for(int i = 0; i < output.RowCount; i++) {
                 var confidence = output.Row(i).At(labels.ElementAt(i));
                 var loss = -MathF.Log(confidence, MathF.E);
@@ -77,6 +84,39 @@ namespace Operation_Terminator
             return lossVec;
         }
 
+        public float CostFunctionDerivative(float x) {
+            return -(1 / x);
+        }
+
+        public static Vector<float> LossSquare(Matrix<float> output, int[] labels) {
+            Vector<float> lossVec = Vector<float>.Build.Dense(output.RowCount);
+            for(int i = 0; i < output.RowCount; i++) {
+                //output.ReduceRows(((floats, vector) => ))
+                float sum = 0;
+                for (int k = 0; k < output.ColumnCount; k++) {
+                    int expVal = labels.ElementAt(i) == k ? 1 : 0; 
+                    sum += output[i, k] - expVal;
+                }
+               
+                lossVec[i] = sum;
+            }
+
+            return lossVec;
+        }
+        
+        // The derivative of the weights * inputs for a node with respect to a specific weight,
+        // is the activation value of the previous node of the same index in the last layer
+
+        public static float LossSquareDerivative(float a, float y) {
+            return 2 * (a - y);
+        }
+
+        public static float ActivationFunctionDerivate(float x) {
+            return Convert.ToInt32(x > 0);
+        } 
+        
+        //public void Backprop()
+        
         public static Matrix<float> SoftMax(Matrix<float> mat) {
 
             for(int i = 0; i < mat.RowCount; i++) {
