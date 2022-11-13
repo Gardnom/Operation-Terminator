@@ -7,7 +7,7 @@ class Program
         static void Main(string[] args) {
             NeuralNetwork nn = new NeuralNetwork();
             
-            while (true) {
+           /* while (true) {
                 Console.Write("Give a number to the machine!: ");
                 string? input = Console.ReadLine();
                 if(input == null){
@@ -30,7 +30,12 @@ class Program
                 Console.WriteLine("Losses: "+ losses);
                 Console.WriteLine("The machine gives you back: " + normResMat[0, 0]);
                 //Console.WriteLine("Normalized: " + normResMat[0, 0]);
-            }
+            }*/
+
+            float[] inputs = {1, 2};
+            int label = 1;
+            nn.Train(Vector<float>.Build.DenseOfArray(inputs), label);
+            Console.ReadLine();
             
             
         }

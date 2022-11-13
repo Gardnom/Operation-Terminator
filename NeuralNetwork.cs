@@ -7,7 +7,7 @@ namespace Operation_Terminator
 {
     public class NeuralNetwork
     {
-        int[] m_NetworkShape = {1, 4, 4, 3};
+        int[] m_NetworkShape = {2, 4, 4, 3};
         private List<Layer> m_HiddenLayers;
 
         public NeuralNetwork() {
@@ -67,6 +67,31 @@ namespace Operation_Terminator
             return lastResult ?? Matrix<float>.Build.Dense(0, 0);
         }
 
+        public float Train(Vector<float> inputs, int label){
+            var outPut = Brain(inputs);
+            if(outPut == null) return 0.0f;
+            //System.Console.WriteLine(inputs.ToRowMatrix());
+            var asMat = outPut.ToRowMatrix()!;
+            var probabilityDistOut = SoftMax(asMat);
+            var probabilityDistOutVec = probabilityDistOut.Column(0);
+            var costVec = LossCatergoricalCrossEntropy(probabilityDistOut, new int[]{label});
+            float cost = costVec.At(0);
+            System.Console.WriteLine(cost);
+            
+            // Backprop
+            for(int i = m_HiddenLayers.Count - 1; i >= 0; i --){
+                var layer = m_HiddenLayers.ElementAt(i);
+                int index = 0;
+                for(int k = 0; k < )
+                layer.biasesSmudge = layer.biases.Map(x => {
+                    return ActivationFunctionDerivate(cost * layer.nodes.At(index));
+                });
+            }
+            
+            //var cost = 
+            return 0.0f;
+        }
+
         public Vector<float> TrainBatch(Matrix<float> inputs, int[] labels) {
             
             var output = BrainBatch(inputs);
@@ -115,7 +140,14 @@ namespace Operation_Terminator
             return Convert.ToInt32(x > 0);
         } 
         
-        //public void Backprop()
+        public void Backprop() {
+            for(int i = m_HiddenLayers.Count; i > 0; i--) {
+                var weights = m_HiddenLayers.ElementAt(i).weights;
+                for(int k = 0; k < weights.ColumnCount; k++){
+                    
+                }
+            }
+        }
         
         public static Matrix<float> SoftMax(Matrix<float> mat) {
 

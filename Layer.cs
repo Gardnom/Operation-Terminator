@@ -11,6 +11,10 @@ namespace Operation_Terminator
         public Vector<float> biases;
         public Matrix<float> weights;
 
+        public Vector<float> desiredValues;
+        public Vector<float> biasesSmudge;
+        public Matrix<float> weightsSmudge;
+
         public Layer(int nInputs, int nNodes) {
             m_NInputs = nInputs;
             m_NNodes = nNodes;
@@ -18,6 +22,10 @@ namespace Operation_Terminator
             nodes = Vector<float>.Build.Dense(nNodes);
             biases = Vector<float>.Build.Dense(nNodes);
             weights = Matrix<float>.Build.Random(nInputs, nNodes);
+
+            desiredValues = Vector<float>.Build.Dense(nNodes);
+            biasesSmudge = Vector<float>.Build.Dense(nNodes);
+            weightsSmudge = Matrix<float>.Build.Random(nInputs, nNodes);
         }
 
         public void ForwardPass(Vector<float> inputs) {
@@ -30,13 +38,7 @@ namespace Operation_Terminator
         }
         
         public Matrix<float> ForwardPassBatch(Matrix<float> inputs) {
-            /*if (inputs.Count != m_NInputs) {
-                Console.WriteLine("Wrong number of inputs in forward pass");
-                return;
-            }*/
-            
             return inputs * weights;
-            
         }
 
         
