@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using MathNet.Numerics.LinearAlgebra;
 
@@ -7,6 +8,8 @@ namespace Operation_Terminator
 {
     public class NeuralNetwork
     {
+        public float m_PercentCorrect;
+        
         int[] m_NetworkShape = {784, 16, 16, 10};
 
         private int NumOutputs() =>
@@ -24,6 +27,11 @@ namespace Operation_Terminator
                 m_HiddenLayers.Add(layer);
             }
 
+            m_HiddenLayers.Last().IsOutputLayer = true;
+        }
+
+        public NeuralNetwork(ICollection<Layer> layers) {
+            m_HiddenLayers = layers.ToList();
             m_HiddenLayers.Last().IsOutputLayer = true;
         }
 
@@ -265,6 +273,69 @@ namespace Operation_Terminator
             //Console.WriteLine(expValues);
             //var normalizedValues = expValues.Map(val => val / normBase);
             return expValues;
+        }
+
+        public bool SaveModelToFile(string path, float percentCorrect) {
+            var writer = new BinaryWriter(new FileStream(path, FileMode.Create));
+            writer.Write(percentCorrect);
+            foreach (var layer in m_HiddenLayers) {
+                // Write metadata about layer
+                writer.Write(layer.m_NNodes);
+                writer.Write(layer.m_NInputs);
+                
+                // Write data about biases
+                foreach (var bias in layer.biases) {
+                    writer.Write(bias);
+                }
+                
+                // Write data about weights
+                var rowEnumerator = layer.weights.EnumerateRows().GetEnumerator();
+                var test = rowEnumerator.Current;
+                while (rowEnumerator.MoveNext()) {
+                    foreach (var val in rowEnumerator.Current) {
+                        writer.Write(val);
+                    }
+                }
+            }
+            
+            writer.Dispose();
+            return true;
+        }
+
+        public static NeuralNetwork LoadModelFromFile(string path) {
+           // NeuralNetwork nn = new NeuralNetwork()
+           List<Layer> layers = new List<Layer>();
+           using var reader = new BinaryReader(new FileStream(path, FileMode.Open));
+           var percentCorrect = BitConverter.ToSingle(reader.ReadBytes(4), 0);
+           
+           readLayer:
+           int numNodes = reader.ReadInt32();
+           int numInputs = reader.ReadInt32();
+           Layer layer = new Layer(numInputs, numNodes);
+           
+           for (int i = 0; i < numNodes; i++) {
+               var bytes = reader.ReadBytes(4);
+               float biasValue = BitConverter.ToSingle(bytes, 0);
+               layer.biases[i] = biasValue;
+           }
+            
+           // For every node there is a row in the weight matrix
+           for (int i = 0; i < numNodes; i++) {
+               for (int k = 0; k < numInputs; k++) {
+                   var bytes = reader.ReadBytes(4);
+                   float weightValue = BitConverter.ToSingle(bytes, 0);
+                   layer.weights[i, k] = weightValue;
+               }
+           }
+           layers.Add(layer);
+           // If not end of file
+           if (reader.PeekChar() != -1) {
+               goto readLayer;
+           }
+
+           var network = new NeuralNetwork(layers);
+           network.m_PercentCorrect = percentCorrect;
+           return network;
         }
     }
 }
