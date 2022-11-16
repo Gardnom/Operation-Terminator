@@ -72,12 +72,11 @@ class Program
             return (inMat, labels);
         }
 
-        static void TrainMNIST(NeuralNetwork nn, int numEpochs = 100) {
+        static void TrainMNIST(NeuralNetwork nn, int numEpochs = 20) {
             var (inMat, labels) = GetDataMNIST(@"H:\dev\Operation-Terminator\Resources\mnist_train.csv");
 
-            int batchSize = 10;
-            int testSampleAmount = 100;
-            int trainingSampleAmount = 10000 - testSampleAmount;
+            int batchSize = 20;
+            int trainingSampleAmount = 60000;
             float startCost = 0.0f;
             float endCost = 0.0f;
 
@@ -95,7 +94,7 @@ class Program
                             startCost = cost;
                     
                     }
-                    nn.UpdateWeightsAndBiases(0.1f, batchSize);
+                    nn.UpdateWeightsAndBiases(0.05f, batchSize);
                 }
 
                 currEpoch++;
@@ -121,7 +120,7 @@ class Program
         }
         
         static void TestMNTI() {
-            NeuralNetwork nn = new NeuralNetwork(new int[]{784, 16, 16, 10});
+            NeuralNetwork nn = new NeuralNetwork(new int[]{784, 28, 24, 10});
            
             int testSampleAmount = 10000;
             int numCorrect = 0;
